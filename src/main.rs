@@ -108,29 +108,15 @@ impl GameState {
 
     fn reveal_cell(&mut self, x: usize, y: usize, clicked: bool) {
         if self.grid[y][x].is_revealed { return; }
-
         self.grid[y][x].is_revealed = true;
 
-        if clicked && self.grid[y][x].is_mine {
-            self.game_over = true;
-        }
-        if self.grid[y][x].is_flagged {
-            self.mines_left += 1;
-        }
+        if clicked && self.grid[y][x].is_mine { self.game_over = true; }
+        if self.grid[y][x].is_flagged { self.mines_left += 1; }
         if self.grid[y][x].is_mine || self.grid[y][x].adjacent_mines > 0 { return; }
 
-        let neighbors = [
-            (-1, -1), (-1, 0), (-1, 1),
-            (0, -1),          (0, 1),
-            (1, -1), (1, 0), (1, 1),
-        ];
-
-        for &(dx, dy) in neighbors.iter() {
-            let new_x = x as i32 + dx;
-            let new_y = y as i32 + dy;
-
-            if new_x >= 0 && new_x < self.width as i32 && new_y >= 0 && new_y < self.height as i32 {
-                self.reveal_cell(new_x as usize, new_y as usize, false);
+        for i in x.saturating_sub(1)..=usize::min(x + 1, self.width - 1) {
+            for j in y.saturating_sub(1)..=usize::min(y + 1, self.height - 1) {
+                self.reveal_cell(i, j, false);
             }
         }
     }
